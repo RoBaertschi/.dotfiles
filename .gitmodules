@@ -1,3 +1,6 @@
-[submodule "nvim-kickstart"]
-	path = nvim-kickstart
-	url = https://github.com/robaertschi/nvim-kickstart
+[submodule ".config/nvim-kickstart"]
+	path = .config/nvim-kickstart
+	url = https://www.github.com/RoBaertschi/nvim-kickstart
+[submodule ".config/tmux/plugins/tpm"]
+	path = .config/tmux/plugins/tpm
+	url = https://github.com/tmux-plugins/tpm
