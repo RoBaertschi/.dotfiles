@@ -4,6 +4,9 @@ alias emsdk_setup ". /home/robin/aur/emsdk/emsdk_env.fish"
 set -gx GBDKDIR ~/aur/gbdk
 set -gx SDCCDIR ~/aur/sdcc
 
+set -Ux fish_tmux_config $HOME/.config/tmux/tmux.conf
+set -Ux fish_tmux_autoconnect false
+
 fish_add_path ~/opt/cross/bin
 fish_add_path ~/bin
 fish_add_path ~/go/bin
