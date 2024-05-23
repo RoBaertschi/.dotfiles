@@ -1,0 +1,151 @@
+#!/bin/bash
+########################
+### WSL Network Tool ###
+### 1.0.2            ###
+########################
+
+#####
+# Tool Configuration
+#####
+
+
+public_dns_1="1.1.1.1"
+public_dns_2="1.0.0.1"
+sc_proxy="http://aproxy.corproot.net:8080/"
+sc_noproxy=localhost,127.0.0.1/32,.swisscom.com,.swisscom.ch,.corproot.net,.sharedtcs.net,*.docker.internal
+sc_dns1="193.47.226.200"
+sc_dns2="193.47.226.40"
+
+#####
+
+echo "***************************"
+echo ""
+
+#Colors
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+yellow=$(tput setaf 3)
+magenta=$(tput setaf 5)
+cyan=$(tput setaf 6)
+reset=$(tput sgr0)
+
+#Print current config
+
+if [ "$http_proxy" != "" ]; then
+    echo "${green}Currently Proxy is set (so we are in Corproot)${reset}";
+else
+    echo "${yellow}No Proxy is set (Privat)${reset}";
+fi
+## Selector
+
+echo "Please select a config to apply"
+options=("Corproot" "Private" "Quit")
+select opt in "${options[@]}"; do
+    case $opt in
+        "Corproot")
+            echo "${cyan}Selected '$opt'${reset}"
+            ####################
+            # Set System Proxy #
+            ####################
+            export http_proxy="${sc_proxy}"
+            export https_proxy="${sc_proxy}"
+            export HTTP_PROXY="${sc_proxy}"
+            export HTTPS_PROXY="${sc_proxy}"
+            export no_proxy="${sc_noproxy}"
+            export NO_PROXY="${sc_noproxy}"
+            # Special proxies sometimes used
+            export all_proxy="${sc_proxy}"
+            export ftp_proxy="${sc_proxy}"
+            export dns_proxy="${sc_proxy}"
+            export rsync_proxy="${sc_proxy}"
+            echo "..configured system proxies (corproot)"
+            #####################
+            # Set Proxy for APT #
+            #####################
+            sudo rm /etc/apt/apt.conf.d/99proxy 2>/dev/null
+            sudo /bin/sh -c 'echo "Acquire::http::Proxy \"'${sc_proxy}'\";" > /etc/apt/apt.conf.d/99proxy'
+            echo "..configured apt proxy (corproot)"
+            ############################
+            # (Optional) Set NPM Proxy #
+            ############################
+            #npm config set registry http://registry.npmjs.org/
+            #npm config set proxy "${sc_proxy}"
+            #npm config set https-proxy "${sc_proxy}"
+            #npm config set strict-ssl false
+            # echo "registry=http://registry.npmjs.org/" > ~/.npmrc
+            # echo "proxy=${sc_proxy}" >> ~/.npmrc
+            # echo "strict-ssl=false" >> ~/.npmrc
+            # echo "http-proxy=${sc_proxy}" >> ~/.npmrc
+            # echo "http_proxy=${sc_proxy}" >> ~/.npmrc
+            # echo "https_proxy=${sc_proxy}" >> ~/.npmrc
+            # echo "https-proxy=${sc_proxy}" >> ~/.npmrc
+            echo "...configured npm proxy (corproot)"
+            ###########
+            # Set DNS #
+            ###########
+            sudo chattr -i /etc/resolv.conf
+            sudo rm /etc/resolv.conf
+            sudo bash -c "echo \"nameserver ${sc_dns1}\" > /etc/resolv.conf"
+            sudo bash -c "echo \"nameserver ${sc_dns2}\" >> /etc/resolv.conf"
+            sudo chattr +i /etc/resolv.conf
+            echo "...configured dns (corproot)"
+            # VPN stuff for WSL #
+            echo "Office or VPN?"
+            options=("Office" "VPN")
+            select opt in "${options[@]}"; do
+                case $opt in
+                    "Office")
+                        break
+                    ;;
+                esac
+                case $opt in
+                    "VPN")
+                        echo "----------"
+                        systemctl status wsl-vpnkit | grep Loaded -A10
+                        echo "----------"
+                        sudo systemctl start wsl-vpnkit
+                        echo "...activated wsl-vpn kit"
+                        break
+                    ;;
+                esac
+            done
+            break
+        ;;
+    esac
+    case $opt in
+        "Private")
+            echo "Selected '$opt'"
+            # Unset Proxy
+            unset http_proxy
+            unset https_proxy
+            echo "...unset proxy"
+            # UnSet Proxy for APT
+            sudo rm /etc/apt/apt.conf.d/99proxy 2>/dev/null
+            echo "...unset apt proxy"
+            # (Optional) Unset NPM Proxy if needed
+            #npm config delete proxy
+            #npm config delete https-proxy
+            # Set public DNS
+            sudo chattr -i /etc/resolv.conf
+            sudo rm /etc/resolv.conf
+            sudo bash -c "echo \"nameserver ${public_dns_1}\" > /etc/resolv.conf"
+            sudo bash -c "echo \"nameserver ${public_dns_2}\" >> /etc/resolv.conf"
+            sudo chattr +i /etc/resolv.conf
+            echo "...set public dns"
+            # Shutdown vpn kit
+            # wsl.exe -d wsl-vpnkit --cd /app service wsl-vpnkit status >/dev/null || \
+            # wsl.exe -d wsl-vpnkit --cd /app service wsl-vpnkit stop
+            sudo systemctl stop wsl-vpnkit
+            #wsl.exe -d wsl-vpnkit --cd /app service wsl-vpnkit status
+            echo "...disabled wsl-vpn kit"
+            break
+        ;;
+        "Quit")
+            echo "Exiting..."
+            break
+        ;;
+        *) echo "invalid option $REPLY" ;;
+    esac
+done
+
+echo "${cyan}Finished${reset}"
