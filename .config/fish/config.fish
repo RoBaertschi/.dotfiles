@@ -15,6 +15,13 @@ function v1
   set -U nvm_default_version latest
 end
 
+function v2
+
+  mkdir -p ~/.ohmyposh
+  bass "curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/.ohmyposh"
+  set -U fish_personal_setup 2
+end
+
 
 alias emsdk_setup ". /home/robin/aur/emsdk/emsdk_env.fish"
 
@@ -32,26 +39,32 @@ fish_add_path ~/aur/sdcc/bin
 fish_add_path ~/aur/gbdk/bin
 fish_add_path ~/aur/Emulicious
 fish_add_path /home/linuxbrew/.linuxbrew/bin
+fish_add_path ~/.local/bin
 set -gx ZVM_INSTALL "$HOME/.zvm/self"
 fish_add_path $ZVM_INSTALL
 fish_add_path $HOME/.zvm/bin
+fish_add_path ~/.ohmyposh/
+fish_add_path ~/.cargo/bin
 if status is-interactive
   
-
-    # Commands to run in interactive sessions can go here
-    alias vim='NVIM_APPNAME="nvim-kickstart" nvim'
-    alias kvim='NVIM_APPNAME="nvim-kickstart" nvim'
-    starship init fish | source
-
-    fzf --fish | source
-
   if not set -q fish_personal_setup
     echo "No fish_personal_setup"
     v1
-  else if [ $fish_personal_setup != "1" ] 
-    echo "Outdated fish setup version"
-    v1
+    v2
+  else if [ $fish_personal_setup -eq 1 ]
+    echo "Updating fish config to version 2"
+    v2
   end
+  
+
+  # Commands to run in interactive sessions can go here
+  alias vim='NVIM_APPNAME="nvim-kickstart" nvim'
+  alias kvim='NVIM_APPNAME="nvim-kickstart" nvim'
+  #starship init fish | source
+  oh-my-posh init fish --config "https://raw.githubusercontent.com/RoBaertschi/powershell-profile/master/robaertschi.omp.json" | source
+
+  fzf --fish | source
+
 
   if set -q work_laptop
     bass source ~/.wsl4sc
