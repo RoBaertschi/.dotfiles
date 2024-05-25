@@ -31,20 +31,24 @@ set -gx SDCCDIR ~/aur/sdcc
 set -Ux fish_tmux_config $HOME/.config/tmux/tmux.conf
 set -Ux fish_tmux_autoconnect false
 
+
+
 fish_add_path ~/opt/cross/bin
 fish_add_path ~/bin
 fish_add_path ~/go/bin
-fish_add_path ~/aur/zig/zigup/scratch/bin
 fish_add_path ~/aur/sdcc/bin
 fish_add_path ~/aur/gbdk/bin
 fish_add_path ~/aur/Emulicious
 fish_add_path /home/linuxbrew/.linuxbrew/bin
 fish_add_path ~/.local/bin
-set -gx ZVM_INSTALL "$HOME/.zvm/self"
-fish_add_path $ZVM_INSTALL
-fish_add_path $HOME/.zvm/bin
 fish_add_path ~/.ohmyposh/
 fish_add_path ~/.cargo/bin
+
+# ZVM
+set -gx ZVM_INSTALL $HOME/.zvm/self
+fish_add_path ~/.zvm/bin
+fish_add_path $ZVM_INSTALL
+
 if status is-interactive
   
   if not set -q fish_personal_setup
