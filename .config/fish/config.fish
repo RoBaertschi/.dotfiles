@@ -57,6 +57,8 @@ if status is-interactive
     v2
   else if [ $fish_personal_setup -eq 1 ]
     echo "Updating fish config to version 2"
+    # Default to starship, as it supports the Ubuntu version of fish
+    set -U fish_personal_starship 1
     v2
   end
   
@@ -64,8 +66,12 @@ if status is-interactive
   # Commands to run in interactive sessions can go here
   alias vim='NVIM_APPNAME="nvim-kickstart" nvim'
   alias kvim='NVIM_APPNAME="nvim-kickstart" nvim'
-  #starship init fish | source
-  oh-my-posh init fish --config "https://raw.githubusercontent.com/RoBaertschi/powershell-profile/master/robaertschi.omp.json" | source
+
+  if not set -q fish_personal_starship
+    oh-my-posh init fish --config "https://raw.githubusercontent.com/RoBaertschi/powershell-profile/master/robaertschi.omp.json" | source
+  else
+    starship init fish | source
+  end
 
   fzf --fish | source
 
