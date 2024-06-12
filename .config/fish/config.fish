@@ -35,6 +35,7 @@ set -Ux fish_tmux_autoconnect false
 
 fish_add_path ~/opt/cross/bin
 fish_add_path ~/bin
+fish_add_path ~/.local/bin/
 fish_add_path ~/go/bin
 fish_add_path ~/aur/sdcc/bin
 fish_add_path ~/aur/gbdk/bin
